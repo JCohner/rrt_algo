@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import random
 import pdb
 from pprint import pprint
+
 #plt.ion()
 class rrt():
 	def __init__(self):
@@ -11,7 +11,7 @@ class rrt():
 		plt.xlim((0,100))
 		plt.ylim((0,100))
 		self.vertex_list = []
-		self.delta = 1 #unit step
+		self.delta = 10 #unit step
 		
 		#gen, plot, and to to list our root!
 		first_point = self.gen_random()
@@ -20,8 +20,8 @@ class rrt():
 		self.plot_point(first_point)
 
 	def add_to_vertex_list(self, point):
-		nearest_vertex = self.nearest_vertex(point)
-		new_vert = self.unit_step_to_nearest_vertex(point, nearest_vertex)
+		nearest_vertex, dist = self.nearest_vertex(point)
+		new_vert = self.unit_step_to_nearest_vertex(point, nearest_vertex, dist)
 		#add this new vert as a child of the nearest vert
 		for x in range(len(self.vertex_list)):
 			if (self.vertex_list[x][0] == nearest_vertex):
@@ -29,16 +29,16 @@ class rrt():
 		self.vertex_list.append([new_vert, []])
 		self.plot_point(new_vert)
 
-	def unit_step_to_nearest_vertex(self, point, vertex):
-		x_delta = point[0] - vertex[0]
-		y_delta = point[1] - vertex[1]
+	def unit_step_to_nearest_vertex(self, point, vertex, dist):
+		x_delta = vertex[0] - point[0] 
+		y_delta = vertex[1] - point[1] 
 
-		angle = np.arctan(y_delta/x_delta)
-		#pdb.set_trace()
-		new_x = (vertex[0] + np.cos(angle)) * self.delta
-		new_y = (vertex[1] + np.sin(angle)) * self.delta
+		vector = np.array([x_delta, y_delta])
+		norm_vector = vector / dist
+		unit_vector = (norm_vector * self.delta).tolist()
 
-		new_vert = (new_x, new_y)
+
+		new_vert = (vertex[0] + unit_vector[0], vertex[1] + unit_vector[1])
 		self.plot_point(new_vert)
 		#print("vertex that is a unit step away is " + str(new_vert))
 		return new_vert
@@ -56,7 +56,7 @@ class rrt():
 		#set min distance to infinite
 		min_dist = np.inf
 		min_pt = None
-		print("point is " + str(point))
+		#print("point is " + str(point))
 		for x in range(len(self.vertex_list)):
 			#print("check vs point " + str(self.vertex_list[x][0]))
 			dist = np.sqrt(np.square(point[0] - self.vertex_list[x][0][0])+ np.square(np.square(point[1] - self.vertex_list[x][0][1])))
@@ -64,7 +64,7 @@ class rrt():
 				min_dist = dist
 				min_pt = self.vertex_list[x][0]
 		#print("nearest vertex is " + str(min_pt))
-		return min_pt
+		return min_pt, min_dist
 
 
 	def run(self, number_points):
