@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 import pdb
 from pprint import pprint
 
@@ -22,6 +23,8 @@ class rrt():
 		print("root is at " + str(first_point))
 		self.vertex_list.append([first_point, [], None])
 		self.plot_point(first_point, None)
+
+		np.random.seed(int(np.random.rand()*10))
 
 	def add_to_vertex_list(self, point):
 		nearest_vertex, dist = self.nearest_vertex(point)
