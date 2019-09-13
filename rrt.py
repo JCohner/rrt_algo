@@ -12,10 +12,10 @@ class rrt():
 	def __init__(self):
 		fig = plt.figure()
 		plt.plot()
-		plt.xlim((0,100))
-		plt.ylim((0,100))
+		#plt.xlim((0,100))
+		#plt.ylim((0,100))
 		self.vertex_list = []
-		self.delta = 10 #unit step
+		self.delta = 1 #unit step
 		
 		#gen, plot, and to to list our root!
 		first_point = self.gen_random()
@@ -32,21 +32,22 @@ class rrt():
 			if (self.vertex_list[x][0] == nearest_vertex):
 				self.vertex_list[x][1].append(new_vert)
 		self.vertex_list.append([new_vert, [], nearest_vertex])
-		#pdb.set_trace()
+		
 		self.plot_point(new_vert, nearest_vertex)
+		#pdb.set_trace()
 
 	def unit_step_to_nearest_vertex(self, point, vertex, dist):
 		x_delta = point[0] - vertex[0] 
 		y_delta = point[1] - vertex[1]
-		print("closest vertex to theor point " + str(point) + " determined as vertex " + str(vertex))
+		#print("closest vertex to theor point " + str(point) + " determined as vertex " + str(vertex))
 
 		vector = np.array([x_delta, y_delta])
-		print("vector is " + str(vector))
+		#print("vector is " + str(vector))
 		norm_vector = vector / dist
-		print("norm vector is " + str(norm_vector))
+		#print("norm vector is " + str(norm_vector))
 		unit_vector = (norm_vector * self.delta).tolist()
 		new_vert = (vertex[0] + unit_vector[0], vertex[1] + unit_vector[1])
-		print("new vertice should be placed at " + str(new_vert))
+		#print("new vertice should be placed at " + str(new_vert))
 		return new_vert
 
 	def gen_random(self):
@@ -59,23 +60,23 @@ class rrt():
 		if (parent == None):
 			plt.scatter(point[0],point[1])
 		else:
-			plt.plot([point[0],parent[0]], [point[1],parent[1]], '-o')
+			plt.plot([point[0],parent[0]], [point[1],parent[1]], '-ob')
 
 	def nearest_vertex(self,point):
 		#set min distance to infinite
 		min_dist = np.inf
 		min_pt = None
-		print("finding closest vertex to theoretical point " + str(point))
+		#print("finding closest vertex to theoretical point " + str(point))
 		for x in range(len(self.vertex_list)):
-			print("checking point " + str(self.vertex_list[x][0]))
+			#print("checking point " + str(self.vertex_list[x][0]))
 			#pdb.set_trace()
 			dist = np.sqrt(np.square(point[0] - self.vertex_list[x][0][0]) + np.square(point[1] - self.vertex_list[x][0][1]))
-			print("dist is " + str(dist))
+			#print("dist is " + str(dist))
 			if (dist < min_dist):
-				print("new min dist set as " + str(dist))
+				#print("new min dist set as " + str(dist))
 				min_dist = dist
 				min_pt = self.vertex_list[x][0]
-		print("determined closest point is " + str(min_pt))
+		#print("determined closest point is " + str(min_pt))
 		return min_pt, min_dist
 
 
@@ -88,8 +89,8 @@ class rrt():
 
 #pdb.set_trace()
 rrt = rrt()
-rrt.run(20)
+rrt.run(100)
 pprint(rrt.vertex_list)
-#pdb.set_trace()
+plt.title("RRT in Freespace")
 plt.show()
 
