@@ -4,6 +4,8 @@ import math
 import pdb
 from pprint import pprint
 
+import obstacle
+
 NODE = 0
 CHILD_LIST = 1
 PARENT = 2
@@ -11,20 +13,24 @@ PARENT = 2
 #plt.ion()
 class rrt():
 	def __init__(self):
-		fig = plt.figure()
+		fig, self.ax = plt.subplots()
 		plt.plot()
-		#plt.xlim((0,100))
-		#plt.ylim((0,100))
+		plt.xlim((0,100))
+		plt.ylim((0,100))
 		self.vertex_list = []
 		self.delta = 1 #unit step
 		
+		#randomize seed
+		np.random.seed(int(np.random.rand()*10))
+
 		#gen, plot, and to to list our root!
 		first_point = self.gen_random()
 		print("root is at " + str(first_point))
 		self.vertex_list.append([first_point, [], None])
 		self.plot_point(first_point, None)
 
-		np.random.seed(int(np.random.rand()*10))
+		self.gen_circle_obstacle(4)
+
 
 	def add_to_vertex_list(self, point):
 		nearest_vertex, dist = self.nearest_vertex(point)
