@@ -29,14 +29,12 @@ class rrt():
 		self.vertex_list.append([first_point, [], None])
 		self.plot_point(first_point, None)
 
-		self.gen_circle_obstacle(4)
+		#instantiate the obstacle manager
+		self.ob_man = obstacle.obstacle_manager(4)
 
 
-	def add_to_vertex_list(self, point):
-		nearest_vertex, dist = self.nearest_vertex(point)
-		new_vert = self.unit_step_to_nearest_vertex(point, nearest_vertex, dist)
+	def add_to_vertex_list(self, new_vert, nearest_vertex):
 		#add this new vert as a child of the nearest vert
-		
 		for x in range(len(self.vertex_list)):
 			if (self.vertex_list[x][0] == nearest_vertex):
 				self.vertex_list[x][1].append(new_vert)
@@ -48,15 +46,12 @@ class rrt():
 	def unit_step_to_nearest_vertex(self, point, vertex, dist):
 		x_delta = point[0] - vertex[0] 
 		y_delta = point[1] - vertex[1]
-		#print("closest vertex to theor point " + str(point) + " determined as vertex " + str(vertex))
 
 		vector = np.array([x_delta, y_delta])
-		#print("vector is " + str(vector))
 		norm_vector = vector / dist
-		#print("norm vector is " + str(norm_vector))
 		unit_vector = (norm_vector * self.delta).tolist()
 		new_vert = (vertex[0] + unit_vector[0], vertex[1] + unit_vector[1])
-		#print("new vertice should be placed at " + str(new_vert))
+
 		return new_vert
 
 	def gen_random(self):
@@ -75,26 +70,32 @@ class rrt():
 		#set min distance to infinite
 		min_dist = np.inf
 		min_pt = None
-		#print("finding closest vertex to theoretical point " + str(point))
 		for x in range(len(self.vertex_list)):
-			#print("checking point " + str(self.vertex_list[x][0]))
-			#pdb.set_trace()
 			dist = np.sqrt(np.square(point[0] - self.vertex_list[x][0][0]) + np.square(point[1] - self.vertex_list[x][0][1]))
-			#print("dist is " + str(dist))
 			if (dist < min_dist):
-				#print("new min dist set as " + str(dist))
 				min_dist = dist
 				min_pt = self.vertex_list[x][0]
-		#print("determined closest point is " + str(min_pt))
 		return min_pt, min_dist
 
-
 	def run(self, number_points):
+		missed = 0
 		for x in range(number_points):
 			#genrate the random point
 			point = self.gen_random()
-			#calculate nearest existing vertex, add point to vertex list			
-			self.add_to_vertex_list(point)
+			#calculate nearest existing vertex			
+			nearest_vertex, dist = self.nearest_vertex(point)
+			#take a unit step in the direction of the random point to find the new vertice to add
+			new_vert = self.unit_step_to_nearest_vertex(point, nearest_vertex, dist)
+			collis_bool = ob_man.collision_detect(nearest_vertex, new_vert)
+			#if that new vertice does not collide with an obstacle then we can add it to the vertex list
+			if not collis_bool:
+				self.add_to_vertex_list(new_vert, nearest_vertex, dist)
+			else:
+				#on miss add to miss count, recurse over count so we still have requested number of nodes
+				missed = missed + 1
+
+		self.run(missed)
+
 
 #pdb.set_trace()
 rrt = rrt()
