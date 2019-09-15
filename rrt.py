@@ -23,14 +23,22 @@ class rrt():
 		#randomize seed
 		np.random.seed(int(np.random.rand()*10))
 
-		#gen, plot, and to to list our root!
-		first_point = self.gen_random()
-		print("root is at " + str(first_point))
-		self.vertex_list.append([first_point, [], None])
-		self.plot_point(first_point, None)
-
 		#instantiate the obstacle manager
-		self.ob_man = obstacle.obstacle_manager(4)
+		self.ob_man = obstacle.obstacle_manager(20, self.ax)
+
+		#gen, plot, and to to list our root!
+		self.plant_root()
+
+	def plant_root(self):
+		root = self.gen_random()
+		conflict = True
+		while(conflict):
+			conflict = self.ob_man.init_collision_detect(root)
+			if conflict:
+				root = self.gen_random()
+
+		self.vertex_list.append([root, [], None])
+		self.plot_point(root, None)
 
 
 	def add_to_vertex_list(self, new_vert, nearest_vertex):
@@ -86,15 +94,16 @@ class rrt():
 			nearest_vertex, dist = self.nearest_vertex(point)
 			#take a unit step in the direction of the random point to find the new vertice to add
 			new_vert = self.unit_step_to_nearest_vertex(point, nearest_vertex, dist)
-			collis_bool = ob_man.collision_detect(nearest_vertex, new_vert)
+			collis_bool = self.ob_man.collision_detect(nearest_vertex, new_vert, dist)
 			#if that new vertice does not collide with an obstacle then we can add it to the vertex list
 			if not collis_bool:
-				self.add_to_vertex_list(new_vert, nearest_vertex, dist)
+				self.add_to_vertex_list(new_vert, nearest_vertex)
 			else:
 				#on miss add to miss count, recurse over count so we still have requested number of nodes
 				missed = missed + 1
-
-		self.run(missed)
+		print("in total " + str(missed) + " misses generated")
+		if missed != 0:
+			self.run(missed)
 
 
 #pdb.set_trace()
