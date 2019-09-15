@@ -4,18 +4,17 @@ import math
 import pdb
 
 class obstacle_manager():
-	def __init__(self, num_obstacles):
+	def __init__(self, num_obstacles, ax):
 		self.circle_obstacles = [] #each entry will be [(location tuple), radius]
+		self.ax = ax
 		self.gen_circle_obstacles(num_obstacles)
-		return self.circle_obstacles #returning this for now, maybe do all collision detection here
+		return  #returning this for now, maybe do all collision detection here
 
 	def gen_circle_obstacles(self, num_circles):
 		for x in range(num_circles):
 			center_point = self.gen_random()
-			print("circle at " + str(center_point))
 			radius = np.random.rand() * 20 #make this a const max size variable at some point
-			print("of radius  " + str(radius))
-			circle = plt.Circle(center_point, radius)
+			circle = plt.Circle(center_point, radius, color = 'k')
 			self.ax.add_artist(circle)
 			self.circle_obstacles.append([center_point, radius])
 
@@ -29,13 +28,25 @@ class obstacle_manager():
 		dist = np.sqrt(np.square(p1[0] - p2[0]) + np.square(p1[1] - p2[1]))
 		return dist
 
+	#call when plotting root of circle to ensure that it doesnt start in an obstacles
+	def init_collision_detect(self, p1):
+		for x in range(len(self.circle_obstacles)):
+			circle_cent = self.circle_obstacles[x][0]
+			radius = self.circle_obstacles[x][1]
+			dist_from_root = self.euc_dist(p1, circle_cent)
+
+			if dist_from_root < radius:
+				return True
+			else:
+				continue
+		return False
+
 	def collision_detect(self, p1, p2, dist):
 		#iterate over all circles if any intersect with new vert, return true
 		#we are going to stick pretty close to notation that Paul Bourke uses in his discusion @ http://paulbourke.net/geometry/pointlineplane/
 		for x in range(len(self.circle_obstacles)):
 			p3 = self.circle_obstacles[x][0] #gets center point
 			radius = self.circle_obstacles[x][1]
-			print("Circle center at " + str(p3))
 
 			u = ((p3[0] - p1[0]) * (p2[0] - p1[0]) + (p3[1] - p1[1]) * (p2[1] - p1[1]))/np.square(dist)
 
@@ -56,6 +67,6 @@ class obstacle_manager():
 			if dist_to_p1 > radius and dist_to_p2 > radius:
 				continue
 			else:
-				return true
+				return True
 
-		return false
+		return False
