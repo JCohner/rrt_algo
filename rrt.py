@@ -10,7 +10,7 @@ NODE = 0
 CHILD_LIST = 1
 PARENT = 2
 
-#plt.ion()
+#plt.ion() #enable this during debugging to see real time 
 class rrt():
 	def __init__(self):
 		fig, self.ax = plt.subplots()
@@ -39,6 +39,7 @@ class rrt():
 
 		self.vertex_list.append([root, [], None])
 		self.plot_point(root, None)
+		self.root = root
 
 
 	def add_to_vertex_list(self, new_vert, nearest_vertex):
@@ -70,10 +71,16 @@ class rrt():
 
 	def plot_point(self, point, parent):
 		if (parent == None):
-			plt.scatter(point[0],point[1])
+			print("plotting root at: " + str((point[0],point[1])))
+			plt.scatter(point[0],point[1], color = 'red', marker = 'h', s=200)
+			#pdb.set_trace()
 		else:
-			plt.plot([point[0],parent[0]], [point[1],parent[1]], '-ob')
-
+			if (parent == self.root):
+				#plt.scatter(parent[0],parent[1], s = 40, c = 'red', marker = 'h')
+				plt.plot([point[0],parent[0]], [point[1],parent[1]], '-b')
+				#pdb.set_trace()
+			else:
+				plt.plot([point[0],parent[0]], [point[1],parent[1]], '-ob')
 	def nearest_vertex(self,point):
 		#set min distance to infinite
 		min_dist = np.inf
@@ -106,10 +113,11 @@ class rrt():
 			self.run(missed)
 
 
-#pdb.set_trace()
+
 rrt = rrt()
-rrt.run(100)
-pprint(rrt.vertex_list)
+rrt.run(1000)
+#pprint(rrt.vertex_list)
 plt.title("RRT in Freespace")
+plt.scatter(rrt.root[0], rrt.root[1], color = 'red', marker = 'h', s=200, zorder = 100)
 plt.show()
 
