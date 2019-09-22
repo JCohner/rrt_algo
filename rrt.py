@@ -10,7 +10,8 @@ NODE = 0
 CHILD_LIST = 1
 PARENT = 2
 
-#plt.ion() #enable this during debugging to see real time 
+
+#lt.ion() #enable this during debugging to see real time 
 class rrt():
 	def __init__(self):
 		fig, self.ax = plt.subplots()
@@ -21,7 +22,7 @@ class rrt():
 		self.delta = 1 #unit step
 		
 		#randomize seed
-		np.random.seed(int(np.random.rand()*10))
+		np.random.seed(int(np.random.rand()*1000))
 
 		#instantiate the obstacle manager
 		self.ob_man = obstacle.obstacle_manager(20, self.ax)
@@ -109,17 +110,27 @@ class rrt():
 
 	def run(self, number_points):
 		missed = 0
+		self.win_node = None
 		for x in range(number_points):
 			#genrate the random point
+			#pdb.set_trace()
 			point = self.gen_random()
 			#calculate nearest existing vertex			
 			nearest_vertex, dist = self.nearest_vertex(point)
 			#take a unit step in the direction of the random point to find the new vertice to add
 			new_vert = self.unit_step_to_nearest_vertex(point, nearest_vertex, dist)
-			collis_bool = self.ob_man.collision_detect(nearest_vertex, new_vert, dist)
+			collis_bool = self.ob_man.collision_detect(nearest_vertex, new_vert, self.delta)
 			#if that new vertice does not collide with an obstacle then we can add it to the vertex list
 			if not collis_bool:
 				self.add_to_vertex_list(new_vert, nearest_vertex)
+				#check win condition
+				#pdb.set_trace()
+				win_con = self.ob_man.win_check(nearest_vertex, self.goal)
+				if not win_con:
+					self.win_node = new_vert
+					self.plot_point(self.win_node, self.goal)
+					break
+
 			else:
 				#on miss add to miss count, recurse over count so we still have requested number of nodes
 				missed = missed + 1
