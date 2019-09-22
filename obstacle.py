@@ -80,7 +80,7 @@ class obstacle_manager():
 			if dist_to_p1 > radius and dist_to_p2 > radius:
 				#print("both points outside of circle, checking if closest point lies on line")
 				#check if p3 exists on line, else continue
-				if u > 1:
+				if u < 1:
 					#this means that the shortest point to the circle exists on the line and is within the circle, therefore the line intersects with the circle
 					return True
 				else:
@@ -91,3 +91,8 @@ class obstacle_manager():
 				return True
 
 		return False
+
+	def win_check(self, vert, goal):
+		dist = self.euc_dist(vert, goal)
+		win_con = self.collision_detect(vert, goal, dist)
+		return win_con
