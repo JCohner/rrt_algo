@@ -28,6 +28,7 @@ class rrt():
 
 		#gen, plot, and to to list our root!
 		self.plant_root()
+		self.plant_goal()
 
 	def plant_root(self):
 		root = self.gen_random()
@@ -36,11 +37,21 @@ class rrt():
 			conflict = self.ob_man.init_collision_detect(root)
 			if conflict:
 				root = self.gen_random()
-
+		self.root = root
 		self.vertex_list.append([root, [], None])
 		self.plot_point(root, None)
-		self.root = root
+		
 
+	def plant_goal(self):
+		goal = self.gen_random()
+		conflict = True
+		while(conflict):
+			conflict = self.ob_man.init_collision_detect(goal)
+			if conflict:
+				goal = self.gen_random()
+
+		self.goal = goal
+		self.plot_point(goal, None)
 
 	def add_to_vertex_list(self, new_vert, nearest_vertex):
 		#add this new vert as a child of the nearest vert
@@ -71,8 +82,12 @@ class rrt():
 
 	def plot_point(self, point, parent):
 		if (parent == None):
-			print("plotting root at: " + str((point[0],point[1])))
-			plt.scatter(point[0],point[1], color = 'red', marker = 'h', s=200)
+			if (point == self.root):
+				print("plotting root at: " + str((point[0],point[1])))
+				plt.scatter(point[0],point[1], color = 'red', marker = 'P', s=200)
+			elif (point == self.goal):
+				print("plotting goal at: " + str(self.goal))
+				plt.scatter(point[0],point[1], color = 'red', marker = 'X', s=200)
 			#pdb.set_trace()
 		else:
 			if (parent == self.root):
@@ -118,6 +133,6 @@ rrt = rrt()
 rrt.run(1000)
 #pprint(rrt.vertex_list)
 plt.title("RRT in Freespace")
-plt.scatter(rrt.root[0], rrt.root[1], color = 'red', marker = 'h', s=200, zorder = 100)
+plt.scatter(rrt.root[0], rrt.root[1], color = 'red', marker = 'P', s=200, zorder = 100)
 plt.show()
 
