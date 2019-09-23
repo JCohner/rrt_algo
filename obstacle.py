@@ -13,7 +13,7 @@ class obstacle_manager():
 	def gen_circle_obstacles(self, num_circles):
 		for x in range(num_circles):
 			center_point = self.gen_random()
-			radius = np.random.rand() * 20 #make this a const max size variable at some point
+			radius = np.random.rand() * 10 #make this a const max size variable at some point
 			circle = plt.Circle(center_point, radius, color = 'k')
 			self.ax.add_artist(circle)
 			self.circle_obstacles.append([center_point, radius])
@@ -63,7 +63,7 @@ class obstacle_manager():
 			if shortest_dist_to_line > radius:
 				#if the shortest distance to the line lies outisde of the circle, it cannot intersect therefore we can check the next circle obstacle
 				continue 
-
+			#pdb.set_trace()
 			#shortest distance to line within the circle, we need to check which of three cases
 			#Case 1: one of the end points exists within the circle INTERSECT CASE
 			#Case 2: both points lay outside circle
@@ -80,7 +80,7 @@ class obstacle_manager():
 			if dist_to_p1 > radius and dist_to_p2 > radius:
 				#print("both points outside of circle, checking if closest point lies on line")
 				#check if p3 exists on line, else continue
-				if u < 1:
+				if u < 1 and u > 0:
 					#this means that the shortest point to the circle exists on the line and is within the circle, therefore the line intersects with the circle
 					return True
 				else:
@@ -93,6 +93,7 @@ class obstacle_manager():
 		return False
 
 	def win_check(self, vert, goal):
+		#pdb.set_trace()
 		dist = self.euc_dist(vert, goal)
 		win_con = self.collision_detect(vert, goal, dist)
 		return win_con
