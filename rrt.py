@@ -3,6 +3,7 @@ import numpy as np
 import math
 import pdb
 from pprint import pprint
+import os
 
 import obstacle
 
@@ -126,7 +127,7 @@ class rrt():
 			self.recurse_win(parent)
 
 	def plot_win_tree(self, node, parent):
-		plt.plot([node[0],parent[0]], [node[1],parent[1]], '-ok')
+		plt.plot([node[0],parent[0]], [node[1],parent[1]], '-oy')
 
 	def run(self, number_points):
 		missed = 0
@@ -162,8 +163,6 @@ class rrt():
 			self.win_path = []
 			self.recurse_win(self.goal)
 
-
-
 rrt = rrt()
 if (rrt.win_node == rrt.root):
 	print("root had a straight path to our goal!")
@@ -171,7 +170,10 @@ else:
 	rrt.run(500)
 #pdb.set_trace()
 #pprint(rrt.vertex_list)
-plt.title("RRT in Freespace")
+plt.title("RRT with Obstacles")
 plt.scatter(rrt.root[0], rrt.root[1], color = 'red', marker = 'P', s=200, zorder = 100)
+filename = 'pictures/{}.png'.format(len(os.listdir('pictures')))
+plt.savefig(filename)
 plt.show()
+
 
