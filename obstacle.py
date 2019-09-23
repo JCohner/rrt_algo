@@ -13,7 +13,7 @@ class obstacle_manager():
 	def gen_circle_obstacles(self, num_circles):
 		for x in range(num_circles):
 			center_point = self.gen_random()
-			radius = np.random.rand() * 10 #make this a const max size variable at some point
+			radius = np.random.rand() * 20 #make this a const max size variable at some point
 			circle = plt.Circle(center_point, radius, color = 'k')
 			self.ax.add_artist(circle)
 			self.circle_obstacles.append([center_point, radius])
