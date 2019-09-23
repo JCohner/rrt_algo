@@ -11,7 +11,7 @@ CHILD_LIST = 1
 PARENT = 2
 
 
-#lt.ion() #enable this during debugging to see real time 
+#plt.ion() #enable this during debugging to see real time 
 class rrt():
 	def __init__(self):
 		fig, self.ax = plt.subplots()
@@ -19,6 +19,7 @@ class rrt():
 		plt.xlim((0,100))
 		plt.ylim((0,100))
 		self.vertex_list = []
+		self.win_node = None
 		self.delta = 1 #unit step
 		
 		#randomize seed
@@ -27,9 +28,10 @@ class rrt():
 		#instantiate the obstacle manager
 		self.ob_man = obstacle.obstacle_manager(20, self.ax)
 
-		#gen, plot, and to to list our root!
-		self.plant_root()
+		#add goal to map
 		self.plant_goal()
+		#add root node
+		self.plant_root()
 
 	def plant_root(self):
 		root = self.gen_random()
@@ -41,6 +43,12 @@ class rrt():
 		self.root = root
 		self.vertex_list.append([root, [], None])
 		self.plot_point(root, None)
+		#check if root has a straight path to winning
+		win_con = self.ob_man.win_check(self.root, self.goal)
+		if not win_con:
+			#perform affirtmative win condition tasks
+			self.win_node = self.root
+			self.add_to_vertex_list(self.goal, self.win_node)
 		
 
 	def plant_goal(self):
@@ -62,6 +70,7 @@ class rrt():
 		self.vertex_list.append([new_vert, [], nearest_vertex])
 		
 		self.plot_point(new_vert, nearest_vertex)
+		#pprint(self.vertex_list)
 		#pdb.set_trace()
 
 	def unit_step_to_nearest_vertex(self, point, vertex, dist):
@@ -83,20 +92,15 @@ class rrt():
 
 	def plot_point(self, point, parent):
 		if (parent == None):
-			if (point == self.root):
+			if (point == self.goal):
+				print("plotting goal at: " + str(self.goal))
+				plt.scatter(point[0],point[1], color = 'yellow', marker = 'X', s=200)
+			elif (point == self.root):
 				print("plotting root at: " + str((point[0],point[1])))
 				plt.scatter(point[0],point[1], color = 'red', marker = 'P', s=200)
-			elif (point == self.goal):
-				print("plotting goal at: " + str(self.goal))
-				plt.scatter(point[0],point[1], color = 'red', marker = 'X', s=200)
-			#pdb.set_trace()
 		else:
-			if (parent == self.root):
-				#plt.scatter(parent[0],parent[1], s = 40, c = 'red', marker = 'h')
-				plt.plot([point[0],parent[0]], [point[1],parent[1]], '-b')
-				#pdb.set_trace()
-			else:
-				plt.plot([point[0],parent[0]], [point[1],parent[1]], '-ob')
+			plt.plot([point[0],parent[0]], [point[1],parent[1]], '-ob')
+
 	def nearest_vertex(self,point):
 		#set min distance to infinite
 		min_dist = np.inf
@@ -108,12 +112,26 @@ class rrt():
 				min_pt = self.vertex_list[x][0]
 		return min_pt, min_dist
 
+	def recurse_win(self, node):
+		self.win_path.append(node)
+		#get the nodes parent
+		for x in range(len(self.vertex_list)):
+			if node == self.vertex_list[x][0]:
+				parent = self.vertex_list[x][2]
+				break
+		self.plot_win_tree(node, parent)
+		if parent == self.root:
+			return
+		else:
+			self.recurse_win(parent)
+
+	def plot_win_tree(self, node, parent):
+		plt.plot([node[0],parent[0]], [node[1],parent[1]], '-ok')
+
 	def run(self, number_points):
 		missed = 0
-		self.win_node = None
 		for x in range(number_points):
 			#genrate the random point
-			#pdb.set_trace()
 			point = self.gen_random()
 			#calculate nearest existing vertex			
 			nearest_vertex, dist = self.nearest_vertex(point)
@@ -124,24 +142,34 @@ class rrt():
 			if not collis_bool:
 				self.add_to_vertex_list(new_vert, nearest_vertex)
 				#check win condition
-				#pdb.set_trace()
 				win_con = self.ob_man.win_check(nearest_vertex, self.goal)
 				if not win_con:
+					#perform affirtmative win condition tasks
 					self.win_node = new_vert
-					self.plot_point(self.win_node, self.goal)
+					self.add_to_vertex_list(self.goal, self.win_node)
 					break
 
 			else:
 				#on miss add to miss count, recurse over count so we still have requested number of nodes
 				missed = missed + 1
 		print("in total " + str(missed) + " misses generated")
-		if missed != 0:
+		if missed != 0 and self.win_node == None:
 			self.run(missed)
+
+		if self.win_node == None:
+			print("no path to goal found")
+		else:
+			self.win_path = []
+			self.recurse_win(self.goal)
 
 
 
 rrt = rrt()
-rrt.run(1000)
+if (rrt.win_node == rrt.root):
+	print("root had a straight path to our goal!")
+else:
+	rrt.run(500)
+#pdb.set_trace()
 #pprint(rrt.vertex_list)
 plt.title("RRT in Freespace")
 plt.scatter(rrt.root[0], rrt.root[1], color = 'red', marker = 'P', s=200, zorder = 100)
